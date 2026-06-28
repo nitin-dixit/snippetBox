@@ -1,12 +1,16 @@
 -- +goose Up
 -- +goose StatementBegin
-create table if not exists sessions(
-token char(43) primary key,
-  data bytea not null,
-  expiry timestamp(6) not null
+create table if not exists sessions (
+    token TEXT primary key,
+    data BYTEA not null,
+    expiry TIMESTAMPTZ not null
 );
 
 create index sessions_expiry_idx on sessions (expiry);
 -- +goose StatementEnd
+
 -- +goose Down
-drop table sessions;
+-- +goose StatementBegin
+drop index if exists sessions_expiry_idx;
+drop table if exists sessions;
+-- +goose StatementEnd
