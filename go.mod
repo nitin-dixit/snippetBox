@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/pgxstore v0.0.0-20251002162104-209de6e426de // indirect
 	github.com/alexedwards/scs/v2 v2.9.0 // indirect
 	github.com/go-playground/form v3.1.4+incompatible // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
