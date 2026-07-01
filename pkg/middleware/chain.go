@@ -13,7 +13,13 @@ type Chain struct {
 
 func New(mw ...Middleware) Chain {
 	return Chain{
-		middlewares: mw,
+		middlewares: slices.Clone(mw),
+	}
+}
+
+func (c Chain) Append(mw ...Middleware) Chain {
+	return Chain{
+		middlewares: append(slices.Clone(c.middlewares), mw...),
 	}
 }
 
