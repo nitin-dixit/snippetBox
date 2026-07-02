@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+const hstsValue = "max-age=31536000; includeSubDomains"
+
 func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !app.isAuthenticated(r) {
@@ -18,15 +20,21 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	})
 }
 
-func commonHeaders(next http.Handler) http.Handler {
+func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.TLS != nil {
+			w.Header().Set(
+				"Strict-Transport-Security",
+				hstsValue,
+			)
+		}
 		w.Header().Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
-		w.Header().Set("Server", "Go")
+		w.Header().Set("Server", "Snippetbox")
 		next.ServeHTTP(w, r)
 	})
 }

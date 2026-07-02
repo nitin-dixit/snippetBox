@@ -27,7 +27,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /snippet/create", protected.ThenFunc(app.snippetCreatePost))
 	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogoutPost))
 
-	standard := middleware.New(app.recoverPanic, app.logRequest, commonHeaders)
+	standard := middleware.New(app.recoverPanic, app.logRequest, secureHeaders)
 
 	return standard.Then(mux)
 }
