@@ -12,7 +12,7 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	dynamic := middleware.New(app.sessionManager.LoadAndSave)
+	dynamic := middleware.New(app.sessionManager.LoadAndSave, middleware.PreventCORF)
 
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /snippet/view/{id}", dynamic.ThenFunc(app.snippetView))
