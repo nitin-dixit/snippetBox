@@ -10,6 +10,8 @@ import (
 	"github.com/nitin-dixit/snippetBox/internal/validator"
 )
 
+const authenticatedUserIDKey = "authenticatedUserID"
+
 type userLoginForm struct {
 	Email               string `form:"email"`
 	Password            string `form:"password"`
@@ -157,7 +159,6 @@ func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = userLoginForm{}
 	app.render(w, r, http.StatusOK, "login.gohtml", data)
-	fmt.Fprintln(w, "Create a new user...")
 }
 
 func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
@@ -200,7 +201,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
+	app.sessionManager.Put(r.Context(), authenticatedUserIDKey, id)
 
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
@@ -212,7 +213,7 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
+	app.sessionManager.Remove(r.Context(), authenticatedUserIDKey)
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
