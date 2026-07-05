@@ -2,21 +2,31 @@ package main
 
 import (
 	"html/template"
+	"io/fs"
 	"path/filepath"
 	"time"
 
 	"github.com/nitin-dixit/snippetBox/internal/models"
+	"github.com/nitin-dixit/snippetBox/ui"
 )
 
 type templateData struct {
-	CurrentYear int
-	Snippet     models.Snippet
-	Snippets    []models.Snippet
-	Form        any
+	CurrentYear     int
+	Snippet         models.Snippet
+	Snippets        []models.Snippet
+	Form            any
+	Flash           string
+	IsAuthenticated bool
 }
 
 func humanDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+	if t.IsZero() {
+		return ""
+	}
+
+	ist := time.FixedZone("IST", 19800)
+
+	return t.In(ist).Format("02 Jan 2006 at 15:04")
 }
 
 var functions = template.FuncMap{
@@ -26,7 +36,7 @@ var functions = template.FuncMap{
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := make(map[string]*template.Template)
 
-	pages, err := filepath.Glob("./ui/html/pages/*.gohtml")
+	pages, err := fs.Glob(ui.Files, "html/pages/*.gohtml")
 	if err != nil {
 		return nil, err
 	}
@@ -34,17 +44,13 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.gohtml")
-		if err != nil {
-			return nil, err
+		patterns := []string{
+			"html/base.gohtml",
+			"html/partials/*.gohtml",
+			page,
 		}
 
-		ts, err = ts.ParseGlob("./ui/html/partials/*.gohtml")
-		if err != nil {
-			return nil, err
-		}
-
-		ts, err = ts.ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFS(ui.Files, patterns...)
 		if err != nil {
 			return nil, err
 		}
