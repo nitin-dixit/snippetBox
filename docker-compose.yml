@@ -16,5 +16,23 @@ services:
       -c shared_buffers=128MB
       -c max_connections=20
 
+  test_db:
+    container_name: "snippetBox-db-test"
+    image: postgres:alpine
+    volumes:
+      - pgdata_test:/var/lib/postgresql
+
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    restart: unless-stopped
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c max_connections=20
+
 volumes:
   pgdata:
+  pgdata_test:
