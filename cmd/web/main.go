@@ -28,11 +28,13 @@ type application struct {
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
+	debug          bool
 }
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
+	debug := flag.Bool("debug", false, "Enable debug mode")
 
 	flag.Parse()
 
@@ -66,6 +68,7 @@ func main() {
 		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
+		debug:          *debug,
 		sessionManager: sessionManager,
 	}
 
@@ -84,6 +87,11 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	if *dsn != "" {
+		logger.Info("using DSN from command-line flag")
+	} else {
+		logger.Info("using DATABASE_URL from environment")
+	}
 	logger.Info("starting server", "addr", *addr)
 
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
