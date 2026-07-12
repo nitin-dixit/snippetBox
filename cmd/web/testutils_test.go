@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -71,5 +72,21 @@ func (ts *testServer) get(t *testing.T, urlPath string) (int, http.Header, strin
 
 	body = bytes.TrimSpace(body)
 
+	return rs.StatusCode, rs.Header, string(body)
+}
+
+func (ts *testServer) postForm(t *testing.T, urlPath string, form url.Values) (int, http.Header, string) {
+	rs, err := ts.Client().PostForm(ts.URL+urlPath, form)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Read the response body from the test server.
+	defer rs.Body.Close()
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = bytes.TrimSpace(body)
+	// Return the response status, headers and body.
 	return rs.StatusCode, rs.Header, string(body)
 }
