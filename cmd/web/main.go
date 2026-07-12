@@ -87,11 +87,20 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	if *dsn != "" {
+	var dsnFlagSet bool
+
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "dsn" {
+			dsnFlagSet = true
+		}
+	})
+
+	if dsnFlagSet {
 		logger.Info("using DSN from command-line flag")
 	} else {
 		logger.Info("using DATABASE_URL from environment")
 	}
+
 	logger.Info("starting server", "addr", *addr)
 
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
