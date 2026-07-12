@@ -46,6 +46,24 @@ func (app *application) about(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "about.gohtml", data)
 }
 
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+	id := app.sessionManager.GetInt(r.Context(), authenticatedUserIDKey)
+
+	user, err := app.users.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.User = user
+	app.render(w, r, http.StatusOK, "account.gohtml", data)
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {
